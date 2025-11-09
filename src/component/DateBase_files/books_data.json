@@ -1,0 +1,61 @@
+{
+    "books": [
+        {
+            "id": 1,
+            "name": "Never Wait For It To Be Easy",
+            "description": "The Power of SOFTUDE - A motivational guide to embracing challenges.",
+            "price": 14.99,
+            "sale": 12.99,
+            "image": "book_cover.jpg"
+            
+        },
+        {
+            "id": 2,
+            "name": "I Have A Plane",
+            "description": "Notebook Series - A collection of aviation-inspired stories and notes.",
+            "price": 10.99,
+            "sale": 9.99,
+            "image": "dark_coffe.png"
+        },
+        {
+            "id": 3,
+            "name": "A Have A Plane",
+            "description": "Notebook Edition - Creative writing with aeronautical themes.",
+            "price": 8.99,
+            "sale": 7.99,
+            "image": "green_filter.png"
+        },
+        {
+            "id": 4,
+            "name": "The Battle of Marshal",
+            "description": "Released on 24 March 2015 - A historical fiction novel about war strategies.",
+            "price": 16.99,
+            "sale": 14.99,
+            "image": "table.jpg"
+        },
+        {
+            "id": 5,
+            "name": "Big Note",
+            "description": "A compilation of personal stories and life lessons from 2017.",
+            "price": 11.99,
+            "sale": null,
+            "image": "Big Note.jpg"
+        },
+        {
+            "id": 6,
+            "name": "Caudine",
+            "description": "Mystery series with nine gripping installments (placeholder description).",
+            "price": 13.99,
+            "sale": 10.99,
+            "image": "download (1).jpg"
+        },
+        {
+            "id": 7,
+            "name": "Border Cover",
+            "description": "NOTEBOOK edition with minimalist design for writers.",
+            "price": 9.99,
+            "sale": null,
+            "image": "border Cover.jpg"
+        }
+    ]
+}

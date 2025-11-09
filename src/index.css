@@ -1,0 +1,70 @@
+@import "tailwindcss";
+
+* {
+  scroll-behavior: smooth;
+  font-family: "Roboto", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+  font-variation-settings: "width" 100;
+}
+:root {
+  /* ========== Primary (Parchment/Coffee/Book Spines) ========== */
+  --color-primary-lightest: #f3ebe3;
+  --color-primary-lighter: #d1bda7;
+  --color-primary-light: #e2d5c5;
+  --color-primary: #b59a7a;
+  --color-primary-dark: #5c4a3a;
+  --color-primary-darker: #3f3127;
+  --color-primary-darkest: #271d16;
+
+  /* ========== Accent (Greens from SOFTUDE) ========== */
+  --color-accent-lightest: #dce8e1;
+  --color-accent-lighter: #c5d7cb;
+  --color-accent-light: #a8c3b0;
+  --color-accent: #6b8e6d;
+  --color-accent-dark: #3a524b;
+  --color-accent-darker: #2f413b;
+  --color-accent-darkest: #1e2926;
+
+  /* ========== Neutrals (Text / Backgrounds) ========== */
+  --color-neutral-lightest: #ffffff;
+  --color-neutral-lighter: #e9e4dc;
+  --color-neutral-light: #f5f1eb;
+  --color-neutral: #d9d1c7;
+  --color-neutral-dark: #2a2118;
+  --color-neutral-darker: #1b1510;
+  --color-neutral-darkest: #0f0c09;
+
+  /* ========== Gradients ========== */
+  --bg-gradient-light: linear-gradient(
+    to right,
+    #e2d5c5 0%,
+    #476cb9 23%,
+    #662d91 46%,
+    #e0002b 100%
+  );
+  --bg-gradient-dark: linear-gradient(
+    to right,
+    #5c4a3a 0%,
+    #2f3e7d 23%,
+    #43205c 46%,
+    #9c0d2a 100%
+  );
+
+  /* ========== Text Colors ========== */
+  --text-main: var(--color-neutral-dark);
+  --text-light: var(--color-neutral-light);
+  --text-muted: var(--color-neutral);
+  --text-inverse: var(--color-neutral-lightest);
+
+  /* ========== Border Colors ========== */
+  --border-light: var(--color-neutral-light);
+  --border: var(--color-neutral);
+  --border-strong: var(--color-primary-dark);
+
+  /* ========== System States ========== */
+  --color-success: #4caf50;
+  --color-warning: #ff9800;
+  --color-error: #f44336;
+  --color-info: #2196f3;
+}

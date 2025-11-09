@@ -1,0 +1,71 @@
+/* hero.css */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Lora:wght@400;500&display=swap');
+
+section {
+  font-family: 'Lora', serif;
+}
+
+h1 {
+  font-family: 'Playfair Display', serif;
+  letter-spacing: -0.05em;
+}
+
+/* Button animation */
+a {
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .hero-content {
+    padding-top: 4rem;
+    padding-bottom: 4rem;
+  }
+  
+  h1 {
+    font-size: 3rem;
+  }
+}
+
+
+/* Keyframes */
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-20px) rotate(3deg); }
+}
+
+/* Styles */
+.animate-gradient-shift {
+  background-size: 200% 200%;
+  animation: gradient-shift 12s ease infinite;
+}
+
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.rotate-y-0 {
+  transform: rotateY(0deg);
+}
+
+.-rotate-y-12 {
+  transform: rotateY(-12deg);
+}
+
+/* Font imports */
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=EB+Garamond:wght@400;500&display=swap');
+
+body {
+  font-family: 'EB Garamond', serif;
+}
+
+h1 {
+  font-family: 'Cormorant Garamond', serif;
+  text-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}

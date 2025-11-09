@@ -1,0 +1,136 @@
+{
+  "jobs": [
+    {
+      "id": "101",
+      "title": "Frontend Developer",
+      "description": "Responsible for implementing user interface components using React.js and other frontend technologies.",
+      "requirements": [
+        "Proficiency in HTML, CSS, and JavaScript",
+        "Experience with React.js",
+        "Knowledge of RESTful APIs",
+        "Familiarity with version control systems such as Git"
+      ],
+      "location": "Remote",
+      "type": "Full-Time",
+      "salary": {
+        "currency": "USD",
+        "range": "60,000 - 80,000"
+      },
+      "company": {
+        "name": "Tech Solutions Inc.",
+        "website": "https://techsolutions.com",
+        "src": "https://i.pinimg.com/736x/39/6d/0c/396d0c31f4fc4bc0d0f96061fa33674b.jpg"
+      }
+    },
+    {
+      "id": "102",
+      "title": "Backend Developer",
+      "description": "Develop and maintain server-side logic and APIs using Node.js and Express.",
+      "requirements": [
+        "Strong knowledge of Node.js",
+        "Experience with databases such as MongoDB or PostgreSQL",
+        "Understanding of REST and GraphQL APIs",
+        "Familiarity with cloud services like AWS or Azure"
+      ],
+      "location": "New York, NY",
+      "type": "Full-Time",
+      "salary": {
+        "currency": "USD",
+        "range": "70,000 - 90,000"
+      },
+      "company": {
+        "name": "NextGen Developers",
+        "website": "https://nextgendevelopers.com",
+        "src": "https://i.pinimg.com/736x/39/6d/0c/396d0c31f4fc4bc0d0f96061fa33674b.jpg"
+      }
+    },
+    {
+      "id": "103",
+      "title": "Full Stack Developer",
+      "description": "Work on both frontend and backend components to deliver seamless web applications.",
+      "requirements": [
+        "Experience with both frontend and backend frameworks (React, Node.js)",
+        "Proficiency in JavaScript and TypeScript",
+        "Ability to design and implement RESTful APIs",
+        "Strong problem-solving skills"
+      ],
+      "location": "San Francisco, CA",
+      "type": "Part-Time",
+      "salary": {
+        "currency": "USD",
+        "range": "40 - 60 per hour"
+      },
+      "company": {
+        "name": "Web Innovators",
+        "website": "https://webinnovators.com",
+        "src": "https://i.pinimg.com/736x/92/31/57/92315728fbeb9cc347201f1b1200964f.jpg"
+      }
+    },
+    {
+      "id": "104",
+      "title": "Mobile App Developer",
+      "description": "Develop and maintain mobile applications for Android and iOS platforms using Flutter.",
+      "requirements": [
+        "Experience with Flutter and Dart",
+        "Knowledge of mobile app design principles",
+        "Understanding of RESTful APIs",
+        "Familiarity with app deployment on Google Play and App Store"
+      ],
+      "location": "Austin, TX",
+      "type": "Full-Time",
+      "salary": {
+        "currency": "USD",
+        "range": "65,000 - 85,000"
+      },
+      "company": {
+        "name": "App Ventures",
+        "website": "https://appventures.com",
+        "src": "https://i.pinimg.com/736x/39/6d/0c/396d0c31f4fc4bc0d0f96061fa33674b.jpg"
+      }
+    },
+    {
+      "id": "105",
+      "title": "DevOps Engineer",
+      "description": "Implement and manage CI/CD pipelines and ensure system reliability and scalability.",
+      "requirements": [
+        "Proficiency in CI/CD tools such as Jenkins and GitHub Actions",
+        "Experience with Docker and Kubernetes",
+        "Knowledge of cloud platforms like AWS or Azure",
+        "Strong scripting skills (Python, Bash)"
+      ],
+      "location": "Remote",
+      "type": "Contract",
+      "salary": {
+        "currency": "USD",
+        "range": "50 - 70 per hour"
+      },
+      "company": {
+        "name": "Cloud Innovate",
+        "website": "https://cloudinnovate.com",
+        "src": "https://i.pinimg.com/736x/39/6d/0c/396d0c31f4fc4bc0d0f96061fa33674b.jpg"
+      }
+    },
+    {
+      "id": "106",
+      "title": "UI/UX Designer",
+      "description": "Design and optimize user interfaces and experiences for web and mobile applications.",
+      "requirements": [
+        "Proficiency in design tools like Figma and Adobe XD",
+        "Strong understanding of user-centered design principles",
+        "Ability to create wireframes and prototypes",
+        "Experience with responsive design"
+      ],
+      "location": "Los Angeles, CA",
+      "type": "Full-Time",
+      "salary": {
+        "currency": "USD",
+        "range": "55,000 - 75,000"
+      },
+      "company": {
+        "name": "Creative Studio",
+        "website": "https://creativestudio.com",
+        "src": "https://i.pinimg.com/1200x/c4/42/32/c442320a27418e455814c44c946b29bd.jpg"
+      }
+    }
+  ]
+}

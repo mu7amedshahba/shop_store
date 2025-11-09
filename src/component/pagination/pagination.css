@@ -1,0 +1,123 @@
+/* .paginateClass{
+    display: flex;
+
+
+
+/* Base container styles */
+.pagination {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin: 20px 0;
+  flex-wrap: wrap;
+}
+
+/* Page number items */
+.pagination-page {
+  margin: 0;
+}
+
+/* Page number links */
+.pagination-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 4px;
+  border: 1px solid #e0e0e0;
+  background-color: #fff;
+  color: #333;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+/* Hover state for page links */
+.pagination-link:hover {
+  background-color: #f5f5f5;
+  border-color: #d0d0d0;
+}
+
+/* Active/selected page */
+.active-page .pagination-link {
+  background-color: #3f51b5;
+  border-color: #3f51b5;
+  color: white;
+  font-weight: 600;
+}
+
+/* Navigation buttons (previous/next) */
+.pagination-nav {
+  margin: 0 4px;
+}
+
+.pagination-nav-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 36px;
+  padding: 0 8px;
+  border-radius: 4px;
+  border: 1px solid #e0e0e0;
+  background-color: #fff;
+  color: #333;
+  font-size: 14px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pagination-nav-link:hover {
+  background-color: #f5f5f5;
+  border-color: #d0d0d0;
+}
+
+/* Disabled navigation buttons */
+.disabled-nav .pagination-nav-link {
+  color: #bdbdbd;
+  background-color: #fafafa;
+  border-color: #eeeeee;
+  cursor: not-allowed;
+}
+.form-select {
+  width: 40%;
+}
+/* Break/ellipsis item */
+.pagination-break {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+}
+
+.pagination-break-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: #666;
+  cursor: default;
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .pagination {
+    gap: 4px;
+  }
+
+  .pagination-link,
+  .pagination-nav-link {
+    width: 30px;
+    height: 30px;
+    font-size: 12px;
+  }
+}

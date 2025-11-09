@@ -1,0 +1,26 @@
+/* Add to your global CSS */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.about-content {
+  animation: fadeIn 1s ease-out forwards;
+}
+
+/* For the image hover effect */
+.group:hover img {
+  transform: scale(1.05);
+  transition: transform 0.7s cubic-bezier(0.25, 0.45, 0.45, 0.95);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .about-section {
+    padding: 2rem;
+  }
+  
+  .about-image {
+    margin-bottom: 2rem;
+  }
+}
