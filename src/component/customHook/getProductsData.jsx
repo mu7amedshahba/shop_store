@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { CAT, PRODS, Prod } from "../../assets/Auth/authPaths";
 import { Axios } from "../../assets/Auth/Axios";
 import productsData from "../DateBase_files/book_products.json";
