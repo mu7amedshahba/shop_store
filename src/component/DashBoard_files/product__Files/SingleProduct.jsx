@@ -1,9 +1,7 @@
+// src/components/products/SingleProduct.jsx
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Axios } from "../../../assets/Auth/Axios";
-import { Prod } from "../../../assets/Auth/authPaths";
-import SpinnerLoad from "../../UI/ReUsable/SpinnerLoad/SpinnerLoad";
 import {
   FiStar,
   FiTruck,
@@ -13,102 +11,132 @@ import {
   FiShoppingCart,
   FiCreditCard,
   FiTrash2,
+  FiBook,
+  FiGlobe,
+  FiFileText,
 } from "react-icons/fi";
+import SpinnerLoad from "../../UI/ReUsable/SpinnerLoad/SpinnerLoad";
 import CartPage from "../../UI/ReUsable/payments/CartPage";
+import useProductsAuth from "../../customHook/getProductsData";
 
 const SingleProduct = ({ count, setCount }) => {
   const { id } = useParams();
-  const [product, setProduct] = useState(null);
-  const [images, setImages] = useState([]); // always strings
+  const {
+    singleProduct,
+    error: hookError,
+    loading: hookLoading,
+    getSingleProduct,
+    clearError,
+  } = useProductsAuth();
+
+  // local UI state
+  const [localError, setLocalError] = useState(null);
+  const [images, setImages] = useState([]);
   const [mainImage, setMainImage] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [quantity, setQuantity] = useState(1);
-  const [selectedColor, setSelectedColor] = useState(null);
   const [showCart, setShowCart] = useState(false);
-  const [stock, setStock] = useState(10);
-  const [selectedSize, setSelectedSize] = useState(null);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
 
+  // fetch product when id changes
   useEffect(() => {
-    const fetchProduct = async () => {
-      try {
-        setLoading(true);
-        const res = await Axios.get(`${Prod}/${id}`);
-        console.log(res)
-        const productData = res.data;
-        console.log(productData);
-        if (!productData) {
-          setProduct(null);
-          return;
-        }
-
-        const normalizedImages = (productData.images || []).map((img) =>
-          typeof img === "string" ? img : img?.image
-        );
-
-        setProduct(productData);
-        setMainImage(normalizedImages[0] || "/placeholder-product.jpg");
-        setSelectedColor(productData.colors?.[0] || null);
-        setSelectedSize(productData.sizes?.[0] || null);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
+    const fetchData = async () => {
+      if (id) {
+        await getSingleProduct(id);
       }
     };
+    fetchData();
+  }, [id, getSingleProduct]);
 
-    fetchProduct();
-  }, [id]);
+  // prepare images when product arrives
+  useEffect(() => {
+    if (!singleProduct) return;
+    const normalizedImages = singleProduct?.images?.filter(Boolean) || [];
+    setImages(normalizedImages);
+    setMainImage(normalizedImages[0].image || "/placeholder-product.jpg");
+  }, [singleProduct]);
 
-  const toggleCart = () => {
-    setShowCart((p) => !p);
+  // Clear errors when component unmounts or ID changes
+  useEffect(() => {
+    return () => {
+      clearError();
+      setLocalError(null);
+    };
+  }, [id, clearError]);
+
+  const toggleCart = () => setShowCart((prev) => !prev);
+
+  // Retry fetching product
+  const retryFetch = () => {
+    clearError();
+    setLocalError(null);
+    if (id) {
+      getSingleProduct(id);
+    }
   };
 
-  if (loading)
+  // --------------- loading ---------------
+  if (hookLoading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
+      <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50 py-20">
         <SpinnerLoad size="xl" />
+        <p className="mt-4 text-blue-600 font-medium">
+          Loading product details...
+        </p>
       </div>
     );
+  }
 
-  if (error)
+  // --------------- error ---------------
+  const errorToShow = hookError || localError;
+  if (errorToShow && !singleProduct) {
     return (
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="max-w-7xl mx-auto p-8 text-center"
+        className="max-w-3xl mx-auto p-8 text-center"
       >
-        <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded">
-          <p>Error loading product: {error}</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="mt-2 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
-          >
-            Try Again
-          </button>
+        <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 p-6 rounded-lg">
+          <FiAlertCircle className="w-12 h-12 mx-auto mb-4 text-yellow-500" />
+          <h3 className="text-xl font-semibold mb-2">Product Loading Issue</h3>
+          <p className="mb-4">{errorToShow}</p>
+          <div className="flex gap-3 justify-center">
+            <button
+              onClick={retryFetch}
+              className="px-5 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
+            >
+              Try API Again
+            </button>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-5 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition"
+            >
+              Reload Page
+            </button>
+          </div>
         </div>
       </motion.div>
     );
-
-  if (!product)
+  }
+  // --------------- no product ---------------
+  if (!singleProduct) {
     return (
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="max-w-7xl mx-auto p-8 text-center"
+        className="max-w-3xl mx-auto p-8 text-center"
       >
-        <h2 className="text-2xl font-bold text-[var(--color-primary-dark)]">
-          Product Not Found
-        </h2>
-        <p className="mt-2 text-[var(--color-primary)]">
-          The requested product could not be found.
+        <h2 className="text-2xl font-bold text-slate-900">Product not found</h2>
+        <p className="mt-2 text-slate-500">
+          The product you're looking for doesn't exist or was removed.
         </p>
       </motion.div>
     );
+  }
 
+  // --------------- main view ---------------
+  const product = singleProduct;
   const ratingValue = parseFloat(product.rating) || 0;
-  const ratingsCount = parseInt(product.ratings_number) || 0;
+  const ratingsCount = product.ratings_number || "0";
   const discountPrice = product.discount
     ? (
         parseFloat(product.price) *
@@ -116,69 +144,79 @@ const SingleProduct = ({ count, setCount }) => {
       ).toFixed(2)
     : null;
 
-  const features = [
+  // Calculate stock based on product type (ebooks typically have unlimited stock)
+  const stock = product.status === "classic" ? 999 : 100;
+
+  const featureList = [
     {
-      name: "Free shipping",
-      icon: FiTruck,
-      description: "Get free delivery on all orders over $50",
+      name: "Instant Download",
+      icon: FiFileText,
+      desc: "Get immediate access after purchase",
     },
     {
-      name: "30-day returns",
-      icon: FiRefreshCw,
-      description: "Not happy? Return within 30 days",
+      name: "Multiple Formats",
+      icon: FiBook,
+      desc: `Available in ${product.format || "PDF, EPUB"}`,
     },
     {
-      name: "Verified quality",
+      name: "DRM Free",
       icon: FiCheckCircle,
-      description: "Quality checked before shipping",
+      desc: "Use on any compatible device",
     },
     {
-      name: "2-year warranty",
-      icon: FiShield,
-      description: "Manufacturer warranty included",
+      name: "Free Updates",
+      icon: FiRefreshCw,
+      desc: "Receive future editions for free",
     },
   ];
 
   const handleAddItem = async () => {
     try {
       setIsAddingToCart(true);
-      setError(null);
+      setLocalError(null);
 
       const cartItems = JSON.parse(localStorage.getItem("product")) || [];
-
-      // quantity selected by user
       const desiredQty = quantity || 1;
+
       if (desiredQty > stock) {
-        setError(`Cannot add ${desiredQty} items (only ${stock} available)`);
+        setLocalError(
+          `Cannot add ${desiredQty} items (only ${stock} available)`
+        );
         return;
       }
 
-      const existingIndex = cartItems.findIndex((item) => item.id == id);
+      const existingIndex = cartItems.findIndex(
+        (item) => item.id === product.id
+      );
 
       if (existingIndex !== -1) {
-        // update existing item qty
         const currentQty = cartItems[existingIndex].count || 1;
         const newQty = Math.min(currentQty + desiredQty, stock);
         cartItems[existingIndex] = {
           ...cartItems[existingIndex],
           count: newQty,
         };
-        setCount(newQty); // notify parent with this product new qty
+        setCount(newQty);
       } else {
-        // add new item
         const newQty = Math.min(desiredQty, stock);
         cartItems.push({
           ...product,
           count: newQty,
+          type: "ebook", // Add product type
+          finalPrice: discountPrice || product.price,
         });
         setCount(newQty);
       }
 
       localStorage.setItem("product", JSON.stringify(cartItems));
+
+      // Show success feedback
+      setTimeout(() => {
+        setIsAddingToCart(false);
+      }, 1000);
     } catch (err) {
       console.error("Cart error:", err);
-      setError("Failed to update cart. Please try again.");
-    } finally {
+      setLocalError("Failed to update cart. Please try again.");
       setIsAddingToCart(false);
     }
   };
@@ -189,8 +227,18 @@ const SingleProduct = ({ count, setCount }) => {
     localStorage.removeItem("product");
   };
 
+  // Format date for display
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
+
   return (
-    <div className="bg-[var(--color-primary-lightest)] min-h-screen py-12">
+    <div className="bg-slate-50 min-h-screen py-10">
+      {/* floating cart */}
       <AnimatePresence>
         {showCart && (
           <CartPage
@@ -202,314 +250,288 @@ const SingleProduct = ({ count, setCount }) => {
       </AnimatePresence>
 
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.5 }}
-        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="max-w-6xl mx-auto px-4 lg:px-0"
       >
-        <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-          <div className="grid md:grid-cols-2 gap-8 p-8">
-            {/* images */}
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+          <div className="grid lg:grid-cols-2 gap-10 p-6 lg:p-10">
+            {/* LEFT: images */}
             <div className="space-y-6">
-              <motion.div
-                whileHover={{ scale: 1.02 }}
-                className="relative rounded-xl overflow-hidden bg-[var(--color-primary-lightest)] aspect-square flex items-center justify-center border border-[var(--color-primary-light)]"
-              >
+              <div className="relative rounded-2xl bg-slate-100 h-80 lg:h-[420px] flex items-center justify-center overflow-hidden border border-slate-200">
                 <motion.img
+                  key={mainImage}
                   src={mainImage}
                   alt={product.title || "Product image"}
-                  className="w-full h-full object-contain transition-opacity duration-300 p-8"
-                  loading="eager"
+                  className="max-h-full max-w-full object-contain p-6"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  transition={{ duration: 0.5 }}
+                  transition={{ duration: 0.3 }}
+                  onError={(e) => {
+                    e.target.src =
+                      "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400&h=400&fit=crop";
+                  }}
                 />
                 {product.discount && (
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className="absolute top-4 left-4 bg-[var(--color-accent)] text-white text-sm font-bold px-3 py-1 rounded-full shadow-lg"
-                  >
+                  <span className="absolute top-4 left-4 bg-emerald-500 text-white text-xs font-semibold px-3 py-1 rounded-full shadow">
                     {product.discount}% OFF
-                  </motion.div>
+                  </span>
                 )}
-              </motion.div>
+                {product.status && (
+                  <span className="absolute top-4 right-4 bg-blue-500 text-white text-xs font-semibold px-3 py-1 rounded-full shadow">
+                    {product.status}
+                  </span>
+                )}
+              </div>
 
               {images.length > 1 && (
                 <div className="grid grid-cols-4 gap-3">
-                  {images.map((img, index) => (
-                    <motion.button
-                      key={index}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => setMainImage(img)}
-                      className={`relative rounded-lg overflow-hidden border-2 transition-all duration-200 aspect-square ${
-                        mainImage === img
-                          ? "border-[var(--color-accent)] ring-2 ring-[var(--color-accent-light)]"
-                          : "border-gray-200 hover:border-gray-300"
+                  {images.map((img, idx) => (
+                    
+                    <button
+                      key={idx}
+                      onClick={() => setMainImage(img.image)}
+                      className={`h-20 rounded-xl overflow-hidden border transition ${
+                        mainImage === img.image
+                          ? "border-emerald-500 ring-2 ring-emerald-200"
+                          : "border-slate-200 hover:border-slate-300"
                       }`}
                     >
                       <img
-                        src={img}
-                        alt={`${product.title || "Product"} thumbnail ${index}`}
+                        src={img.image}
+                        alt={`Thumbnail ${idx + 1}`}
                         className="w-full h-full object-cover"
-                        loading="lazy"
+                        onError={(e) => {
+                          e.target.src =
+                            "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=100&h=100&fit=crop";
+                        }}
                       />
-                    </motion.button>
+                    </button>
                   ))}
                 </div>
               )}
             </div>
 
-            {/* info */}
+            {/* RIGHT: info */}
             <div className="space-y-6">
+              {/* title + rating */}
               <div>
-                <h1 className="text-3xl font-bold text-[var(--color-primary-dark)]">
+                <h1 className="text-3xl font-bold text-slate-900 tracking-tight">
                   {product.title}
                 </h1>
-                <div className="mt-2 flex items-center">
-                  <div className="flex items-center">
-                    {[0, 1, 2, 3, 4].map((rating) => (
-                      <FiStar
-                        key={rating}
-                        className={`h-5 w-5 flex-shrink-0 ${
-                          rating < ratingValue
-                            ? "text-[var(--color-accent)] fill-current"
-                            : "text-gray-300 fill-current"
-                        }`}
-                      />
-                    ))}
-                  </div>
-                  <p className="ml-2 text-sm text-[var(--color-primary)]">
-                    {ratingsCount} review{ratingsCount !== 1 ? "s" : ""}
-                  </p>
-                  <span className="mx-2 text-gray-300">|</span>
-                  <span className="text-sm text-green-600">In Stock</span>
-                </div>
-              </div>
-
-              <div className="mt-4">
-                <div className="flex items-center">
-                  {discountPrice ? (
-                    <>
-                      <p className="text-3xl font-bold text-[var(--color-primary-dark)]">
-                        ${discountPrice}
-                      </p>
-                      <p className="ml-3 text-lg text-gray-500 line-through">
-                        ${product.price}
-                      </p>
-                      <span className="ml-3 inline-flex items-center rounded-md bg-[var(--color-accent-light)] px-2 py-0.5 text-sm font-medium text-[var(--color-accent-dark)]">
-                        Save {product.discount}%
-                      </span>
-                    </>
-                  ) : (
-                    <p className="text-3xl font-bold text-[var(--color-primary-dark)]">
-                      ${product.price}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              <div className="mt-6">
-                <h2 className="text-lg font-medium text-[var(--color-primary-dark)]">
-                  Description
-                </h2>
-                <p className="mt-2 text-[var(--color-primary)]">
-                  {product.description}
+                <p className="mt-2 text-lg text-slate-600">
+                  by {product.author}
                 </p>
-              </div>
-
-              {product.colors?.length > 0 && (
-                <div className="mt-6">
-                  <h3 className="text-sm font-medium text-[var(--color-primary-dark)]">
-                    Color
-                  </h3>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {product.colors.map((color) => (
-                      <motion.button
-                        key={color}
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
-                        onClick={() => setSelectedColor(color)}
-                        className={`rounded-full w-8 h-8 flex items-center justify-center transition-all ${
-                          selectedColor === color
-                            ? "ring-2 ring-offset-2 ring-[var(--color-accent)]"
-                            : ""
+                <div className="mt-3 flex items-center gap-3">
+                  <div className="flex">
+                    {[0, 1, 2, 3, 4].map((i) => (
+                      <FiStar
+                        key={i}
+                        className={`h-5 w-5 ${
+                          i < Math.floor(ratingValue)
+                            ? "text-amber-400 fill-amber-400"
+                            : "text-slate-200"
                         }`}
-                        style={{ backgroundColor: color }}
-                        title={color}
                       />
                     ))}
                   </div>
-                </div>
-              )}
-
-              {product.sizes?.length > 0 && (
-                <div className="mt-6">
-                  <h3 className="text-sm font-medium text-[var(--color-primary-dark)]">
-                    Size
-                  </h3>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {product.sizes.map((size) => (
-                      <motion.button
-                        key={size}
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={() => setSelectedSize(size)}
-                        className={`px-4 py-2 border rounded-md text-sm font-medium transition-colors ${
-                          selectedSize === size
-                            ? "bg-[var(--color-accent)] text-white border-transparent"
-                            : "bg-white text-[var(--color-primary-dark)] border-[var(--color-primary-light)] hover:bg-[var(--color-primary-lightest)]"
-                        }`}
-                      >
-                        {size}
-                      </motion.button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              <div className="mt-6">
-                <label
-                  htmlFor="quantity"
-                  className="block text-sm font-medium text-[var(--color-primary-dark)]"
-                >
-                  Quantity
-                </label>
-                <select
-                  id="quantity"
-                  name="quantity"
-                  value={quantity}
-                  onChange={(e) => {
-                    const v = parseInt(e.target.value);
-                    setQuantity(v);
-                    setCount(v); 
-                  }}
-                  className="mt-1 block w-24 rounded-md border border-[var(--color-primary-light)] py-2 pl-3 pr-8 text-base focus:border-[var(--color-accent)] focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)] sm:text-sm"
-                >
-                  {[1, 2, 3, 4, 5, 6, 7, 8].map((num) => (
-                    <option key={num} value={num}>
-                      {num}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="mt-6">
-                <label className="block text-sm font-medium text-[var(--color-primary-dark)]">
-                  Items in Cart
-                </label>
-                <div className="mt-1 p-2 bg-[var(--color-primary-lightest)] rounded-md inline-block px-4">
-                  <span className="font-medium text-[var(--color-primary-dark)]">
-                    {count}
+                  <p className="text-sm text-slate-500">
+                    {ratingValue.toFixed(1)} ({ratingsCount} ratings)
+                  </p>
+                  <span className="text-slate-300">•</span>
+                  <span className="text-sm text-emerald-600 font-medium">
+                    In stock
                   </span>
                 </div>
               </div>
 
-              <div className="mt-8 flex flex-col sm:flex-row gap-4">
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+              {/* price */}
+              <div className="flex items-center gap-3">
+                {discountPrice ? (
+                  <>
+                    <span className="text-3xl font-bold text-slate-900">
+                      ${discountPrice}
+                    </span>
+                    <span className="text-slate-400 line-through">
+                      ${product.price}
+                    </span>
+                    <span className="px-2 py-1 bg-emerald-50 text-emerald-700 text-xs font-semibold rounded-full">
+                      Save {product.discount}%
+                    </span>
+                  </>
+                ) : (
+                  <span className="text-3xl font-bold text-slate-900">
+                    ${product.price}
+                  </span>
+                )}
+              </div>
+
+              {/* description */}
+              <div>
+                <h2 className="text-sm font-semibold text-slate-800 mb-2">
+                  Description
+                </h2>
+                <p className="text-sm text-slate-600 leading-relaxed">
+                  {product.description}
+                </p>
+              </div>
+
+              {/* product details */}
+              <div className="grid grid-cols-2 gap-4 p-4 bg-slate-50 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <FiFileText className="w-4 h-4 text-slate-400" />
+                  <span className="text-sm text-slate-600">Format:</span>
+                  <span className="text-sm font-medium text-slate-800">
+                    {product.format}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <FiBook className="w-4 h-4 text-slate-400" />
+                  <span className="text-sm text-slate-600">Pages:</span>
+                  <span className="text-sm font-medium text-slate-800">
+                    {product.pages}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <FiGlobe className="w-4 h-4 text-slate-400" />
+                  <span className="text-sm text-slate-600">Language:</span>
+                  <span className="text-sm font-medium text-slate-800">
+                    {product.language}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <FiCheckCircle className="w-4 h-4 text-slate-400" />
+                  <span className="text-sm text-slate-600">Category:</span>
+                  <span className="text-sm font-medium text-slate-800 capitalize">
+                    {product.category}
+                  </span>
+                </div>
+              </div>
+
+              {/* publication info */}
+              <div className="text-xs text-slate-500 space-y-1">
+                <p>Published: {formatDate(product.created_at)}</p>
+                <p>Last updated: {formatDate(product.updated_at)}</p>
+              </div>
+
+              {/* quantity + current cart count */}
+              <div className="flex items-center gap-6 flex-wrap">
+                <div>
+                  <label
+                    htmlFor="quantity"
+                    className="block text-sm font-medium text-slate-700 mb-1"
+                  >
+                    Quantity
+                  </label>
+                  <select
+                    id="quantity"
+                    value={quantity}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value, 10);
+                      setQuantity(val);
+                    }}
+                    className="w-24 rounded-lg border-slate-200 focus:border-emerald-500 focus:ring-emerald-500"
+                  >
+                    {[1, 2, 3, 4, 5].map((n) => (
+                      <option key={n} value={n}>
+                        {n}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <p className="text-sm font-medium text-slate-700">
+                    Items in cart
+                  </p>
+                  <p className="mt-1 inline-block px-4 py-1 bg-slate-100 rounded-full text-slate-800 font-semibold">
+                    {count}
+                  </p>
+                </div>
+              </div>
+
+              {/* actions */}
+              <div className="flex flex-col sm:flex-row gap-3">
+                <button
                   onClick={handleAddItem}
                   disabled={isAddingToCart}
-                  className={`flex-1 flex items-center justify-center gap-2 border border-transparent rounded-md py-3 px-8 text-base font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-accent)] transition-all ${
+                  className={`flex-1 inline-flex items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-semibold text-white transition ${
                     isAddingToCart
-                      ? "bg-[var(--color-accent-dark)] cursor-not-allowed"
-                      : "bg-[var(--color-accent)] hover:bg-[var(--color-accent-dark)]"
+                      ? "bg-emerald-400 cursor-not-allowed"
+                      : "bg-emerald-500 hover:bg-emerald-600"
                   }`}
                 >
                   {isAddingToCart ? (
                     <>
-                      <svg
-                        className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                      >
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                        ></circle>
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        ></path>
-                      </svg>
+                      <span className="inline-block h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                       Adding...
                     </>
                   ) : (
                     <>
-                      <FiShoppingCart className="h-5 w-5" />
+                      <FiShoppingCart className="w-5 h-5" />
                       Add to cart
                     </>
                   )}
-                </motion.button>
+                </button>
 
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                <button
                   onClick={toggleCart}
-                  className="flex-1 flex items-center justify-center gap-2 bg-white border border-[var(--color-primary-light)] rounded-md py-3 px-8 text-base font-medium text-[var(--color-primary-dark)] hover:bg-[var(--color-primary-lightest)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all"
+                  className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-semibold border border-slate-200 text-slate-800 hover:bg-slate-50 transition"
                 >
-                  <FiCreditCard className="h-5 w-5" />
+                  <FiCreditCard className="w-5 h-5" />
                   Buy now
-                </motion.button>
+                </button>
 
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                <button
                   onClick={handleReset}
-                  className="flex-1 flex items-center justify-center gap-2 bg-red-500 border border-transparent rounded-md py-3 px-8 text-base font-medium text-white hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all"
+                  className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-semibold bg-red-500 text-white hover:bg-red-600 transition"
                 >
-                  <FiTrash2 className="h-5 w-5" />
-                  Clear Cart
-                </motion.button>
+                  <FiTrash2 className="w-5 h-5" />
+                  Clear cart
+                </button>
               </div>
 
-              {error && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="mt-4 bg-red-100 text-red-700 p-3 rounded-md shadow-sm"
-                >
-                  <p className="text-sm">{error}</p>
-                </motion.div>
+              {localError && (
+                <p className="text-sm text-red-500 bg-red-50 border border-red-100 rounded-md px-3 py-2">
+                  {localError}
+                </p>
               )}
 
-              <div className="mt-8 border-t border-[var(--color-primary-light)] pt-8">
-                <h2 className="text-lg font-medium text-[var(--color-primary-dark)]">
-                  Features
-                </h2>
-                <div className="mt-4 grid grid-cols-1 gap-y-4 sm:grid-cols-2 sm:gap-x-6">
-                  {features.map((feature) => (
-                    <motion.div
-                      key={feature.name}
-                      whileHover={{ x: 5 }}
-                      className="flex items-start"
-                    >
-                      <div className="flex-shrink-0">
-                        <feature.icon
-                          className="h-6 w-6 text-[var(--color-accent)]"
-                          aria-hidden="true"
-                        />
-                      </div>
-                      <div className="ml-3">
-                        <p className="text-sm font-medium text-[var(--color-primary-dark)]">
-                          {feature.name}
+              {/* features */}
+              <div className="pt-6 border-t border-slate-100">
+                <h3 className="text-sm font-semibold text-slate-800 mb-3">
+                  Ebook Features
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {featureList.map((f) => (
+                    <div key={f.name} className="flex gap-3 items-start">
+                      <f.icon className="w-6 h-6 text-emerald-500 mt-1" />
+                      <div>
+                        <p className="text-sm font-semibold text-slate-800">
+                          {f.name}
                         </p>
-                        <p className="text-sm text-[var(--color-primary)]">
-                          {feature.description}
-                        </p>
+                        <p className="text-xs text-slate-500">{f.desc}</p>
                       </div>
-                    </motion.div>
+                    </div>
                   ))}
                 </div>
               </div>
+
+              {/* Preview button */}
+              {product.preview && (
+                <div className="pt-4">
+                  <a
+                    href={product.preview}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition"
+                  >
+                    <FiFileText className="w-4 h-4" />
+                    Read Preview
+                  </a>
+                </div>
+              )}
             </div>
           </div>
         </div>

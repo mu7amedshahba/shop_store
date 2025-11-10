@@ -22,10 +22,10 @@ import CartPage from "../../ReUsable/payments/CartPage";
 const Navbar = () => {
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [user, setUser] = useState(null); // no loading screen
+  const [user, setUser] = useState(null);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [errorMessage, setError] = useState(null);
+  const [error, setError] = useState(null); // ✅ add error state
   const cartRef = useRef(null);
 
   const { cartItems } = useCart();
@@ -51,13 +51,15 @@ const Navbar = () => {
 
   // fetch user ONLY if we have token
   useEffect(() => {
+    const token = localStorage.getItem(JWT_TOKEN);
+    if (!token) return; // no token → no fetch
 
     (async () => {
       try {
         const res = await Axios.get(USER);
         setUser(res.data);
+        setError(null);
       } catch (err) {
-        // لو التوكن باظ أو انتهى خلاص تجاهل
         setError(err.response?.data?.message || err.message);
         setUser(null);
       }
@@ -76,8 +78,7 @@ const Navbar = () => {
       },
     ];
 
-    // admin / user with dashboard
-    const userRole = user?.role?.toString(); // in case it comes as number
+    const userRole = user?.role?.toString();
     if (userRole === "1995") {
       baseLinks.push({
         name: "Dashboard",
@@ -95,7 +96,6 @@ const Navbar = () => {
     } catch (error) {
       setError(error.message);
     } finally {
-      // سواء نجحت أو لأ هنفضي الواجهة
       setUser(null);
       setMenuOpen(false);
     }
@@ -203,7 +203,9 @@ const Navbar = () => {
                       border: "1px solid var(--color-primary-light)",
                     }}
                   >
-                    <CartPage setIsCartOpen={setIsCartOpen} />
+                    {/* CartPage in your other components uses setShowCart,
+                        so we pass it like that to keep API consistent */}
+                    <CartPage setShowCart={setIsCartOpen} />
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -227,7 +229,10 @@ const Navbar = () => {
                 </motion.button>
               ) : (
                 <>
-                  <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                  <motion.div
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
+                  >
                     <Link
                       to="/sign-in"
                       className="px-4 py-2 rounded-md text-sm font-medium flex items-center gap-2"
@@ -240,7 +245,10 @@ const Navbar = () => {
                       Sign In
                     </Link>
                   </motion.div>
-                  <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                  <motion.div
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
+                  >
                     <Link
                       to="/sign-up"
                       className="px-4 py-2 rounded-md text-sm font-medium flex items-center gap-2"
@@ -277,6 +285,13 @@ const Navbar = () => {
           </div>
         </div>
       </div>
+
+      {/* error banner (optional) */}
+      {error && (
+        <div className="bg-red-100 text-red-700 text-sm px-4 py-2 text-center">
+          {error}
+        </div>
+      )}
 
       {/* Mobile Menu */}
       <AnimatePresence>

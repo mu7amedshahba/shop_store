@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   FiSearch,
   FiShoppingCart,
@@ -17,7 +17,6 @@ const ProductsPage = () => {
 
   // from your custom hook
   const { products, category, getProducts, getCategory } = useProductsAuth();
-
   // State
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -27,18 +26,22 @@ const ProductsPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(12);
 
+  // fetch products + categories once
+  const fetchAll = async () => {
+    try {
+      setLoading(true);
+      await Promise.all([getProducts(), getCategory()]);
+      setError("");
+    } catch (err) {
+      setError(err?.message || "Failed to load products");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    (async () => {
-      try {
-        setLoading(true);
-        await Promise.all([getProducts(), getCategory()]);
-        setError("");
-      } catch (err) {
-        setError(err?.message || "Failed to load products");
-      } finally {
-        setLoading(false);
-      }
-    })();
+    fetchAll();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Filter + sort
@@ -47,15 +50,16 @@ const ProductsPage = () => {
     let result = [...safeProducts];
 
     // search
-    if (searchTerm) {
+    if (searchTerm.trim()) {
+      const term = searchTerm.toLowerCase();
       result = result.filter(
         (product) =>
-          product?.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          product?.description?.toLowerCase().includes(searchTerm.toLowerCase())
+          product?.title?.toLowerCase().includes(term) ||
+          product?.description?.toLowerCase().includes(term)
       );
     }
 
-    // category filter (important: compare as strings)
+    // category filter
     if (selectedCategory !== "all") {
       result = result.filter(
         (product) => String(product?.category) === String(selectedCategory)
@@ -65,16 +69,24 @@ const ProductsPage = () => {
     // sorting
     switch (sortOption) {
       case "price-low":
-        result.sort((a, b) => (a?.price || 0) - (b?.price || 0));
+        result.sort(
+          (a, b) => (a?.price || 0) - (b?.price || 0)
+        );
         break;
       case "price-high":
-        result.sort((a, b) => (b?.price || 0) - (a?.price || 0));
+        result.sort(
+          (a, b) => (b?.price || 0) - (a?.price || 0)
+        );
         break;
       case "rating":
-        result.sort((a, b) => (b?.rating || 0) - (a?.rating || 0));
+        result.sort(
+          (a, b) => (b?.rating || 0) - (a?.rating || 0)
+        );
         break;
       case "name":
-        result.sort((a, b) => (a?.title || "").localeCompare(b?.title || ""));
+        result.sort((a, b) =>
+          (a?.title || "").localeCompare(b?.title || "")
+        );
         break;
       default:
         break;
@@ -86,8 +98,7 @@ const ProductsPage = () => {
   // pagination
   const paginatedProducts = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    return filteredProducts.slice(startIndex, endIndex);
+    return filteredProducts.slice(startIndex, startIndex + itemsPerPage);
   }, [filteredProducts, currentPage, itemsPerPage]);
 
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
@@ -95,7 +106,6 @@ const ProductsPage = () => {
 
   // build category options from API
   const categoryOptions = useMemo(() => {
-    // API gives: [{id, title, ...}]
     const base = Array.isArray(category) ? category : [];
     return [{ id: "all", title: "All Categories" }, ...base];
   }, [category]);
@@ -145,7 +155,7 @@ const ProductsPage = () => {
           <div className="text-red-500 text-6xl mb-4">⚠️</div>
           <p className="text-red-600 mb-4">{error}</p>
           <button
-            onClick={() => window.location.reload()}
+            onClick={fetchAll}
             className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg transition-colors"
           >
             Try Again
@@ -178,7 +188,10 @@ const ProductsPage = () => {
                 type="text"
                 placeholder="Search products..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setCurrentPage(1);
+                }}
                 className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
               />
             </div>
@@ -220,8 +233,7 @@ const ProductsPage = () => {
         {/* info */}
         <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
           <p className="text-gray-600 text-sm">
-            Showing {paginatedProducts.length} of {filteredProducts.length}{" "}
-            products
+            Showing {paginatedProducts.length} of {filteredProducts.length} products
             {searchTerm && ` for "${searchTerm}"`}
             {selectedCategory !== "all" &&
               ` in ${
@@ -240,34 +252,32 @@ const ProductsPage = () => {
 
         {/* grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
-          <AnimatePresence>
-            {paginatedProducts.length === 0 ? (
-              <div className="col-span-full text-center py-12">
-                <div className="text-gray-400 text-6xl mb-4">🔍</div>
-                <p className="text-gray-500 text-lg">
-                  {products.length === 0
-                    ? "No products available"
-                    : "No products found matching your criteria"}
-                </p>
-                <p className="text-gray-400 text-sm mt-2">
-                  {products.length === 0
-                    ? "Please check back later"
-                    : "Try adjusting your search or filters"}
-                </p>
-              </div>
-            ) : (
-              paginatedProducts.map((product) => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  categories={category} // 👈 pass categories here
-                  onAddToCart={handleAddToCart}
-                  onViewDetails={handleViewDetails}
-                  onProductClick={handleProductClick}
-                />
-              ))
-            )}
-          </AnimatePresence>
+          {paginatedProducts.length === 0 ? (
+            <div className="col-span-full text-center py-12">
+              <div className="text-gray-400 text-6xl mb-4">🔍</div>
+              <p className="text-gray-500 text-lg">
+                {Array.isArray(products) && products.length === 0
+                  ? "No products available"
+                  : "No products found matching your criteria"}
+              </p>
+              <p className="text-gray-400 text-sm mt-2">
+                {Array.isArray(products) && products.length === 0
+                  ? "Please check back later"
+                  : "Try adjusting your search or filters"}
+              </p>
+            </div>
+          ) : (
+            paginatedProducts.map((product) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                categories={category}
+                onAddToCart={handleAddToCart}
+                onViewDetails={handleViewDetails}
+                onProductClick={handleProductClick}
+              />
+            ))
+          )}
         </div>
 
         {/* pagination */}
@@ -296,15 +306,17 @@ const ProductCard = ({
 }) => {
   if (!product) return null;
 
-  // match category
   const matchedCategory = Array.isArray(categories)
     ? categories.find((item) => String(item.id) === String(product.category))
     : null;
 
-  const discountedPrice =
-    product.discount > 0
-      ? product.price - (product.price * product.discount) / 100
-      : null;
+  const price = Number(product.price) || 0;
+  const discount = Number(product.discount) || 0;
+  const hasDiscount = discount > 0 && price > 0;
+  const discountedPrice = hasDiscount
+    ? price - (price * discount) / 100
+    : null;
+
 
   return (
     <motion.div
@@ -321,7 +333,7 @@ const ProductCard = ({
       >
         {product.images?.[0] ? (
           <motion.img
-            src={product.images[0]}
+            src={product.images[0].image}
             alt={product.title || "Product image"}
             className="max-h-full max-w-full object-cover group-hover:scale-105 transition-transform duration-300"
             loading="lazy"
@@ -335,9 +347,9 @@ const ProductCard = ({
           </div>
         )}
 
-        {product.discount > 0 && (
+        {hasDiscount && (
           <div className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold">
-            -{product.discount}%
+            -{discount}%
           </div>
         )}
       </div>
@@ -346,7 +358,7 @@ const ProductCard = ({
       <div className="p-5">
         <div className="flex justify-between items-start mb-3">
           <span className="inline-block px-2 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded-md capitalize">
-            {matchedCategory ? matchedCategory.title : "Un categorized"}
+            {matchedCategory ? matchedCategory.title : "Uncategorized"}
           </span>
           <div className="flex items-center">
             <FiStar className="w-4 h-4 text-yellow-400 fill-current" />
@@ -370,18 +382,18 @@ const ProductCard = ({
         <div className="flex items-center justify-between">
           <div className="flex flex-col">
             <div className="flex items-center gap-2">
-              {discountedPrice ? (
+              {hasDiscount ? (
                 <>
                   <span className="text-xl font-bold text-purple-600">
                     ${discountedPrice.toFixed(2)}
                   </span>
                   <span className="text-sm text-gray-500 line-through">
-                    ${product.price}
+                    ${price.toFixed(2)}
                   </span>
                 </>
               ) : (
                 <span className="text-xl font-bold text-purple-600">
-                  ${product.price || "0.00"}
+                  ${price.toFixed(2)}
                 </span>
               )}
             </div>
