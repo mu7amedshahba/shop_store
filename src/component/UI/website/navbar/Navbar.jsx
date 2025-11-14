@@ -25,18 +25,13 @@ const Navbar = () => {
   const [user, setUser] = useState(null);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [error, setError] = useState(null); // ✅ add error state
+  const [error, setError] = useState(null);
   const cartRef = useRef(null);
 
   const { cartItems } = useCart();
   const { logOut } = userAuth();
 
   // sticky nav
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   // close cart on outside click
   useEffect(() => {
@@ -140,7 +135,7 @@ const Navbar = () => {
             </Link>
           </motion.div>
 
-          {/* Desktop Navigation */}
+          {/*  */}
           <div className="hidden md:block">
             <div className="ml-10 flex items-center space-x-4">
               {navLinks.map(({ name, url, icon }) => {
@@ -189,7 +184,6 @@ const Navbar = () => {
                   </motion.span>
                 )}
               </motion.button>
-
               <AnimatePresence>
                 {isCartOpen && (
                   <motion.div
@@ -203,9 +197,12 @@ const Navbar = () => {
                       border: "1px solid var(--color-primary-light)",
                     }}
                   >
-                    {/* CartPage in your other components uses setShowCart,
-                        so we pass it like that to keep API consistent */}
-                    <CartPage setShowCart={setIsCartOpen} />
+                    {/* Fix: Pass setIsShowCart as setIsCartOpen */}
+                    <CartPage
+                      setIsShowCart={setIsCartOpen}
+                      count={cartItemCount}
+                      setCount={() => {}} // You might need to implement this
+                    />
                   </motion.div>
                 )}
               </AnimatePresence>

@@ -1,32 +1,3 @@
-// import React, { useEffect } from 'react';
-
-// export default function Toast({ type, message, onClose }) {
-//   useEffect(() => {
-//     const timer = setTimeout(() => {
-//       onClose();
-//     }, 5000);
-
-//     return () => clearTimeout(timer);
-//   }, [onClose]);
-
-//   const bgColor = {
-//     success: 'bg-green-500',
-//     error: 'bg-red-500',
-//     warning: 'bg-yellow-500',
-//     info: 'bg-blue-500'
-//   }[type];
-
-//   return (
-//     <div className={`fixed bottom-4 right-4 ${bgColor} text-white px-4 py-2 rounded shadow-lg`}>
-//       <div className="flex items-center justify-between">
-//         <span>{message}</span>
-//         <button onClick={onClose} className="ml-4">
-//           &times;
-//         </button>
-//       </div>
-//     </div>
-//   );
-// }
 
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
@@ -43,7 +14,6 @@ import {
 import { Axios } from "../../../assets/Auth/Axios";
 import { PRODS } from "../../../assets/Auth/authPaths";
 import PaginatedItems from "../../pagination/Pagination";
-import booksData from "../../DateBase_files/book_products.json";
 
 //
 const ProductsPage = () => {

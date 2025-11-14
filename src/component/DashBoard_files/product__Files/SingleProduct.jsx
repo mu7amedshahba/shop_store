@@ -288,7 +288,6 @@ const SingleProduct = ({ count, setCount }) => {
               {images.length > 1 && (
                 <div className="grid grid-cols-4 gap-3">
                   {images.map((img, idx) => (
-                    
                     <button
                       key={idx}
                       onClick={() => setMainImage(img.image)}
